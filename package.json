@@ -14,7 +14,7 @@
     "formats": "tsx src/cli.ts formats",
     "render": "tsx src/cli.ts render",
     "mcp": "tsx src/mcp/server.ts",
-    "test": "node --experimental-strip-types --test src/metrics/filters.test.ts src/metrics/library-view.test.ts src/tiktok/parse.test.ts src/tiktok/candidates.test.ts src/db/library.test.ts src/studio/render.test.ts"
+    "test": "node --experimental-strip-types --test src/metrics/filters.test.ts src/metrics/library-view.test.ts src/metrics/niche.test.ts src/tiktok/parse.test.ts src/tiktok/candidates.test.ts src/db/library.test.ts src/studio/render.test.ts"
   },
   "engines": {
     "node": ">=22"

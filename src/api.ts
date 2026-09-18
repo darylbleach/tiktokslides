@@ -1,5 +1,14 @@
 import { parseFilters } from "./config.ts";
-import { getAccount, getJob, listFormats, listLibrary, nameFormat } from "./db/library.ts";
+import {
+  getAccount,
+  getJob,
+  listCaptionsByUsername,
+  listFormats,
+  listLibrary,
+  listSearchKeywords,
+  nameFormat,
+  rescoreLibraryAccounts,
+} from "./db/library.ts";
 import { startDiscovery, runDownload, waitForJob } from "./jobs/runner.ts";
 import { connectChrome, researchPage } from "./chrome/session.ts";
 import { measureProfile } from "./tiktok/profile.ts";
@@ -29,8 +38,15 @@ export function listLibraryAccounts(input: {
   minViews?: number;
 }): LibraryRow[] {
   const filters = parseFilters(undefined);
+  rescoreLibraryAccounts(filters);
+  const captions = listCaptionsByUsername();
+  const keywordsBySearch = listSearchKeywords();
   const rows = listLibrary({ niche: input.niche, minViews: input.minViews }).map((account) =>
-    decorateLibraryAccount(account, filters),
+    decorateLibraryAccount(account, filters, {
+      signature: account.signature,
+      captions: captions.get(account.username.toLowerCase()) ?? [],
+      keywords: (account.searchId != null ? keywordsBySearch.get(account.searchId) : undefined) ?? "wedding planning",
+    }),
   );
   return input.verdict ? rows.filter((row) => row.verdict === input.verdict) : rows;
 }
@@ -43,7 +59,10 @@ export async function readAccount(username: string, liveFallback = false) {
   const session = await connectChrome();
   const page = await researchPage(session);
   const snapshot = await measureProfile(page, username);
-  const judged = evaluateAccount(snapshot.metrics, parseFilters(undefined));
+  const judged = evaluateAccount(snapshot.metrics, parseFilters(undefined), {
+    signature: snapshot.account.signature,
+    captions: snapshot.posts.map((post) => post.caption),
+  });
   const record = {
     ...snapshot.metrics,
     verdict: judged.verdict,

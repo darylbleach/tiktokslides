@@ -30,7 +30,7 @@ Other useful first-niche keywords: `wedding guest list`, `seating chart`, `save 
 
 1. Search TikTok the way you would, from your logged-in Chrome.
 2. Measure accounts: slideshow share, median views, views per follower, cadence.
-3. Verdicts: passed / near miss (with margin) / failed. Defaults are tuned for wedding slideshows: ≥50% slideshow share, ≥1,000 median slideshow views, ≥0.2 views/follower, ≥0.3 posts/week.
+3. Verdicts: passed / near miss (with margin) / failed. An account cannot pass unless username, bio, captions, or hashtags contain real wedding tokens (wedding, bride, bridal, groom, vows, seating, guest list, …). Generic words like “planning” do not count. Defaults: ≥50% slideshow share, ≥1,000 median slideshow views, ≥0.2 views/follower, ≥0.3 posts/week.
 4. Download slideshow slides, and render simple 1080×1920 PNG drafts.
 
 ## MCP tools

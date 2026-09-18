@@ -44,4 +44,20 @@ describe("library view", () => {
     assert.match(text, /share=1\.00/);
     assert.match(text, /1 passed, 0 near-miss, 0 failed/);
   });
+
+  it("names niche when a strong slideshow account is off-topic", () => {
+    const row = decorateLibraryAccount(
+      {
+        ...base,
+        username: "medicalmama_",
+        nickname: "E",
+        signature: "raising kids, raising hell",
+        hashtags: ["toddlersoftiktok"],
+      },
+      DEFAULT_FILTERS,
+      { captions: ["My children are my life"], keywords: "wedding planning" },
+    );
+    assert.equal(row.verdict, "failed");
+    assert.ok(row.missed.includes("niche"));
+  });
 });
