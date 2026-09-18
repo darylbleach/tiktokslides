@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "tiktokslides": {
+      "command": "pnpm",
+      "args": ["mcp"],
+      "cwd": "/Users/darylbleach/Projects/tiktokslides"
+    }
+  }
+}
