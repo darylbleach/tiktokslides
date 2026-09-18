@@ -81,4 +81,18 @@ describe("evaluateAccount", () => {
     );
     assert.equal(result.verdict, "passed");
   });
+
+  it("fails an off-niche slideshow farm even with strong metrics", () => {
+    const result = evaluateAccount(
+      { ...base, username: "bikeridedaily", nickname: "Bike Ride Daily", hashtags: ["cycling"] },
+      DEFAULT_FILTERS,
+      {
+        signature: "Daily rides",
+        captions: ["morning ride with the crew", "new saddle day"],
+        keywords: "wedding planning",
+      },
+    );
+    assert.equal(result.verdict, "failed");
+    assert.equal(result.breakdown.find((item) => item.key === "niche")?.status, "fail");
+  });
 });

@@ -16,8 +16,10 @@ export const DEFAULT_FILTERS: Filters = {
   nearMissMargin: 0.1,
 };
 
+export type ConstraintKey = keyof Omit<Filters, "nearMissMargin"> | "niche";
+
 export type ConstraintResult = {
-  key: keyof Omit<Filters, "nearMissMargin">;
+  key: ConstraintKey;
   actual: number;
   required: number;
   status: "pass" | "near" | "fail";

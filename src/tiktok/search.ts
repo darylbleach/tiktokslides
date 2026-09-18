@@ -76,13 +76,17 @@ export async function searchKeyword(page: Page, keyword: string, targetAccounts:
   try {
     while (!search.exhausted) {
       last = await search.collectMore();
-      const selected = selectDiscoveryCandidates(last.accounts, last.posts, seen, photoAuthorsFrom(last.posts));
+      const selected = selectDiscoveryCandidates(last.accounts, last.posts, seen, photoAuthorsFrom(last.posts), {
+        keywords: keyword,
+      });
       const accounts = [...selected.preferred, ...selected.fallback];
       if (accounts.length >= targetAccounts) {
         return { keyword, accounts, posts: last.posts };
       }
     }
-    const selected = selectDiscoveryCandidates(last.accounts, last.posts, seen, photoAuthorsFrom(last.posts));
+    const selected = selectDiscoveryCandidates(last.accounts, last.posts, seen, photoAuthorsFrom(last.posts), {
+      keywords: keyword,
+    });
     return { keyword, accounts: [...selected.preferred, ...selected.fallback], posts: last.posts };
   } finally {
     search.close();

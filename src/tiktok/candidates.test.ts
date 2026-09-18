@@ -70,4 +70,29 @@ describe("selectDiscoveryCandidates", () => {
     assert.deepEqual(selected.preferred, []);
     assert.equal(selected.skipped[0]?.reason, "seen");
   });
+
+  it("skips off-niche photo authors when keywords are set", () => {
+    const weddingPost = {
+      ...post("the.bride.club", true),
+      caption: "Wedding week gets chaotic",
+      hashtags: ["weddingplanning"],
+    };
+    const bikePost = {
+      ...post("bikeridedaily", true),
+      caption: "morning ride with the crew",
+      hashtags: ["cycling"],
+    };
+    const selected = selectDiscoveryCandidates(
+      [account("the.bride.club", 12000), account("bikeridedaily")],
+      [weddingPost, bikePost],
+      new Set(),
+      [],
+      { keywords: "wedding planning" },
+    );
+    assert.deepEqual(
+      selected.preferred.map((item) => item.username),
+      ["the.bride.club"],
+    );
+    assert.equal(selected.skipped.some((item) => item.username === "bikeridedaily" && item.reason === "off_niche"), true);
+  });
 });

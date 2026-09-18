@@ -5,6 +5,9 @@ import type {
   Filters,
   Verdict,
 } from "../types.ts";
+import { matchNiche, type NicheInput } from "./niche.ts";
+
+export type EvaluateExtras = Pick<NicheInput, "signature" | "captions" | "keywords">;
 
 export function median(values: number[]): number {
   if (values.length === 0) {
@@ -31,7 +34,19 @@ export function postsPerWeek(createTimes: number[]): number {
   return createTimes.length / weeks;
 }
 
-export function evaluateAccount(metrics: AccountMetrics, filters: Filters): FilterResult {
+export function evaluateAccount(
+  metrics: AccountMetrics,
+  filters: Filters,
+  extras: EvaluateExtras = {},
+): FilterResult {
+  const niche = matchNiche({
+    username: metrics.username,
+    nickname: metrics.nickname,
+    signature: extras.signature,
+    hashtags: metrics.hashtags,
+    captions: extras.captions,
+    keywords: extras.keywords ?? "wedding planning",
+  });
   const breakdown: ConstraintResult[] = [
     grade("minSlideshowShare", metrics.slideshowShare, filters.minSlideshowShare, filters.nearMissMargin),
     grade("minMedianViews", metrics.medianViews, filters.minMedianViews, filters.nearMissMargin),
@@ -42,6 +57,13 @@ export function evaluateAccount(metrics: AccountMetrics, filters: Filters): Filt
       filters.nearMissMargin,
     ),
     grade("minPostsPerWeek", metrics.postsPerWeek, filters.minPostsPerWeek, filters.nearMissMargin),
+    {
+      key: "niche",
+      actual: niche.score,
+      required: 1,
+      status: niche.relevant ? "pass" : "fail",
+      shortfall: niche.relevant ? 0 : 1,
+    },
   ];
 
   const hasFail = breakdown.some((item) => item.status === "fail");

@@ -2,6 +2,8 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import Database from "better-sqlite3";
 import { DATA_DIR, DB_PATH } from "../paths.ts";
+import { DEFAULT_FILTERS } from "../types.ts";
+import { evaluateAccount } from "../metrics/filters.ts";
 import type {
   Filters,
   Job,
@@ -198,6 +200,49 @@ export function upsertPosts(posts: TikTokPost[]): void {
 export function listMeasuredUsernames(): string[] {
   const rows = getDb().prepare("SELECT username FROM accounts").all() as Array<{ username: string }>;
   return rows.map((row) => row.username.toLowerCase());
+}
+
+export function listCaptionsByUsername(): Map<string, string[]> {
+  const rows = getDb().prepare("SELECT username, caption FROM posts").all() as Array<{
+    username: string;
+    caption: string;
+  }>;
+  const byUser = new Map<string, string[]>();
+  for (const row of rows) {
+    const key = row.username.toLowerCase();
+    const list = byUser.get(key) ?? [];
+    list.push(row.caption);
+    byUser.set(key, list);
+  }
+  return byUser;
+}
+
+export function listSearchKeywords(): Map<number, string> {
+  const rows = getDb().prepare("SELECT id, keywords FROM searches").all() as Array<{
+    id: number;
+    keywords: string;
+  }>;
+  return new Map(rows.map((row) => [Number(row.id), row.keywords]));
+}
+
+export function rescoreLibraryAccounts(filters = DEFAULT_FILTERS): number {
+  const captions = listCaptionsByUsername();
+  const keywordsBySearch = listSearchKeywords();
+  const accounts = listLibrary();
+  let updated = 0;
+  for (const account of accounts) {
+    const judged = evaluateAccount(account, filters, {
+      signature: account.signature,
+      captions: captions.get(account.username.toLowerCase()) ?? [],
+      keywords: (account.searchId != null ? keywordsBySearch.get(account.searchId) : undefined) ?? "wedding planning",
+    });
+    if (judged.verdict === account.verdict && judged.margin === account.margin) {
+      continue;
+    }
+    upsertAccount({ ...account, verdict: judged.verdict, margin: judged.margin });
+    updated += 1;
+  }
+  return updated;
 }
 
 export function listLibrary(query: LibraryQuery = {}): StoredAccount[] {

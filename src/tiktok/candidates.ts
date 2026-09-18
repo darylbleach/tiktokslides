@@ -1,12 +1,14 @@
+import { matchNiche } from "../metrics/niche.ts";
 import type { TikTokAccount, TikTokPost } from "../types.ts";
 
-export type SkipReason = "seen" | "video_only" | "no_posts";
+export type SkipReason = "seen" | "video_only" | "no_posts" | "off_niche";
 
 export type AuthorEvidence = {
   username: string;
   account: TikTokAccount;
   slideshowPosts: number;
   videoPosts: number;
+  nicheScore: number;
 };
 
 export type CandidateSelection = {
@@ -20,6 +22,7 @@ export function selectDiscoveryCandidates(
   posts: TikTokPost[],
   seen: Set<string>,
   photoAuthors: Iterable<string> = [],
+  options: { keywords?: string } = {},
 ): CandidateSelection {
   const photoSet = new Set([...photoAuthors].map((name) => name.toLowerCase()));
   const byUser = new Map<string, AuthorEvidence>();
@@ -36,6 +39,7 @@ export function selectDiscoveryCandidates(
         account: { ...account, username },
         slideshowPosts: existing?.slideshowPosts ?? 0,
         videoPosts: existing?.videoPosts ?? 0,
+        nicheScore: existing?.nicheScore ?? 0,
       });
     }
   }
@@ -50,6 +54,7 @@ export function selectDiscoveryCandidates(
         account: { username: name, nickname: "", followers: 0, signature: "" },
         slideshowPosts: 0,
         videoPosts: 0,
+        nicheScore: 0,
       });
     }
   }
@@ -64,6 +69,7 @@ export function selectDiscoveryCandidates(
       account: { username, nickname: "", followers: 0, signature: "" },
       slideshowPosts: 0,
       videoPosts: 0,
+      nicheScore: 0,
     };
     if (post.isSlideshow) {
       current.slideshowPosts += 1;
@@ -97,6 +103,20 @@ export function selectDiscoveryCandidates(
       skipped.push({ username: evidence.username, reason: "video_only" });
       continue;
     }
+    const authorPosts = posts.filter((post) => post.username.replace(/^@/, "").toLowerCase() === evidence.username);
+    const niche = matchNiche({
+      username: evidence.username,
+      nickname: evidence.account.nickname,
+      signature: evidence.account.signature,
+      hashtags: authorPosts.flatMap((post) => post.hashtags),
+      captions: authorPosts.map((post) => post.caption),
+      keywords: options.keywords,
+    });
+    evidence.nicheScore = niche.score;
+    if (options.keywords != null && !niche.relevant) {
+      skipped.push({ username: evidence.username, reason: "off_niche" });
+      continue;
+    }
     if (evidence.slideshowPosts > 0) {
       preferred.push(evidence);
     } else {
@@ -104,8 +124,10 @@ export function selectDiscoveryCandidates(
     }
   }
 
-  preferred.sort((a, b) => b.slideshowPosts - a.slideshowPosts || b.account.followers - a.account.followers);
-  fallback.sort((a, b) => b.account.followers - a.account.followers);
+  preferred.sort(
+    (a, b) => b.nicheScore - a.nicheScore || b.slideshowPosts - a.slideshowPosts || b.account.followers - a.account.followers,
+  );
+  fallback.sort((a, b) => b.nicheScore - a.nicheScore || b.account.followers - a.account.followers);
 
   return {
     preferred: preferred.map((item) => item.account),

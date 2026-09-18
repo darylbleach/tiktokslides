@@ -1,12 +1,13 @@
 import { DEFAULT_FILTERS } from "../types.ts";
 import type { ConstraintResult, Filters, StoredAccount, Verdict } from "../types.ts";
-import { evaluateAccount } from "./filters.ts";
+import { evaluateAccount, type EvaluateExtras } from "./filters.ts";
 
 const CONSTRAINT_LABEL: Record<ConstraintResult["key"], string> = {
   minSlideshowShare: "share",
   minMedianViews: "median",
   minViewsPerFollower: "vpf",
   minPostsPerWeek: "cadence",
+  niche: "niche",
 };
 
 export type LibraryRow = StoredAccount & {
@@ -14,8 +15,16 @@ export type LibraryRow = StoredAccount & {
   missed: string[];
 };
 
-export function decorateLibraryAccount(account: StoredAccount, filters: Filters = DEFAULT_FILTERS): LibraryRow {
-  const judged = evaluateAccount(account, filters);
+export function decorateLibraryAccount(
+  account: StoredAccount,
+  filters: Filters = DEFAULT_FILTERS,
+  extras: EvaluateExtras = {},
+): LibraryRow {
+  const judged = evaluateAccount(account, filters, {
+    signature: extras.signature ?? account.signature,
+    captions: extras.captions,
+    keywords: extras.keywords,
+  });
   return {
     ...account,
     verdict: judged.verdict,
@@ -59,6 +68,9 @@ export function countVerdicts(rows: Array<{ verdict: Verdict }>): {
 }
 
 function formatMiss(item: ConstraintResult): string {
+  if (item.key === "niche") {
+    return "niche";
+  }
   return `${CONSTRAINT_LABEL[item.key]} ${formatActual(item)}<${formatRequired(item)}`;
 }
 

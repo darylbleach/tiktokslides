@@ -92,12 +92,18 @@ async function runDiscovery(id: string, keywords: string, target: number, filter
           const found = await withHumanRetry(id, page, () => search.collectMore());
           upsertPosts(found.posts);
           const photoAuthors = found.posts.filter((post) => post.isSlideshow).map((post) => post.username);
-          const selected = selectDiscoveryCandidates(found.accounts, found.posts, seen, photoAuthors);
+          const selected = selectDiscoveryCandidates(found.accounts, found.posts, seen, photoAuthors, {
+            keywords: term,
+          });
           for (const skipped of selected.skipped) {
             if (skipped.reason === "video_only" && !seen.has(skipped.username)) {
               seen.add(skipped.username);
               skippedVideoOnly += 1;
               log(`[discover] skip @${skipped.username} video-only in search`);
+            }
+            if (skipped.reason === "off_niche" && !seen.has(skipped.username)) {
+              seen.add(skipped.username);
+              log(`[discover] skip @${skipped.username} off-niche in search`);
             }
           }
           const queue = search.exhausted ? [...selected.preferred, ...selected.fallback] : selected.preferred;
@@ -119,7 +125,11 @@ async function runDiscovery(id: string, keywords: string, target: number, filter
             progress = { ...progress, currentUsername: account.username };
             updateJob(id, { status: "running", progress, needsHumanReason: null });
             const snapshot = await withHumanRetry(id, page, () => measureProfile(page, account.username));
-            const judged = evaluateAccount(snapshot.metrics, filters);
+            const judged = evaluateAccount(snapshot.metrics, filters, {
+              signature: snapshot.account.signature,
+              captions: snapshot.posts.map((post) => post.caption),
+              keywords,
+            });
             upsertAccount({
               ...snapshot.metrics,
               verdict: judged.verdict,
