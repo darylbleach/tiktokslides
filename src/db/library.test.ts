@@ -8,6 +8,7 @@ import {
   getAccount,
   getJob,
   listLibrary,
+  listMeasuredUsernames,
   nameFormat,
   openLibrary,
   resetDbForTests,
@@ -63,6 +64,7 @@ describe("library", () => {
 
     const listed = listLibrary({ niche: "wedding", verdict: "passed", minViews: 10_000 });
     assert.equal(listed.length, 1);
+    assert.equal(listMeasuredUsernames().includes("plannerjane"), true);
     const account = getAccount("plannerjane");
     assert.equal(account?.posts.length, 1);
     assert.equal(account?.verdict, "passed");

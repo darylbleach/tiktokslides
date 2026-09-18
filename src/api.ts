@@ -4,9 +4,10 @@ import { startDiscovery, runDownload, waitForJob } from "./jobs/runner.ts";
 import { connectChrome, researchPage } from "./chrome/session.ts";
 import { measureProfile } from "./tiktok/profile.ts";
 import { evaluateAccount } from "./metrics/filters.ts";
+import { decorateLibraryAccount, type LibraryRow } from "./metrics/library-view.ts";
 import { upsertAccount, upsertPosts } from "./db/library.ts";
 import { renderDraft, type DraftLayout } from "./studio/render.ts";
-import type { Filters, Job, NamedFormat, StoredAccount, Verdict } from "./types.ts";
+import type { Filters, Job, NamedFormat, Verdict } from "./types.ts";
 
 export function startDiscoveryJob(keywords: string, target = 20, filters?: Record<string, unknown>): Job {
   return startDiscovery({ keywords, target, filters });
@@ -26,8 +27,12 @@ export function listLibraryAccounts(input: {
   niche?: string;
   verdict?: Verdict;
   minViews?: number;
-}): StoredAccount[] {
-  return listLibrary(input);
+}): LibraryRow[] {
+  const filters = parseFilters(undefined);
+  const rows = listLibrary({ niche: input.niche, minViews: input.minViews }).map((account) =>
+    decorateLibraryAccount(account, filters),
+  );
+  return input.verdict ? rows.filter((row) => row.verdict === input.verdict) : rows;
 }
 
 export async function readAccount(username: string, liveFallback = false) {

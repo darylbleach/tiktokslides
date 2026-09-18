@@ -10,6 +10,7 @@ import {
   waitForJob,
 } from "./api.ts";
 import { log } from "./log.ts";
+import { formatLibraryTable } from "./metrics/library-view.ts";
 import type { DraftLayout } from "./studio/render.ts";
 import type { Verdict } from "./types.ts";
 
@@ -31,15 +32,19 @@ async function main(cmd: string | undefined, args: string[]): Promise<void> {
     case "job":
       printJson(readJob(need(args[0], "job id")));
       return;
-    case "library":
-      printJson(
-        listLibraryAccounts({
-          niche: flag(args, "niche"),
-          verdict: flag(args, "verdict") as Verdict | undefined,
-          minViews: numFlag(args, "min-views"),
-        }),
-      );
+    case "library": {
+      const rows = listLibraryAccounts({
+        niche: flag(args, "niche"),
+        verdict: flag(args, "verdict") as Verdict | undefined,
+        minViews: numFlag(args, "min-views"),
+      });
+      if (args.includes("--json")) {
+        printJson(rows);
+        return;
+      }
+      log(formatLibraryTable(rows));
       return;
+    }
     case "account":
       printJson(await readAccount(need(args[0], "username"), true));
       return;
@@ -73,7 +78,7 @@ async function main(cmd: string | undefined, args: string[]): Promise<void> {
       log(`Usage:
   pnpm discover "wedding planning" --target 20
   pnpm job <id>
-  pnpm library --niche wedding --verdict passed --min-views 10000
+  pnpm library --niche wedding --verdict passed --min-views 1000
   pnpm account <username>
   pnpm download <url>
   pnpm formats --name "Numbered hook" --posts 123,456
@@ -93,7 +98,16 @@ async function discover(args: string[]): Promise<void> {
   });
   log(`Job ${job.id} started. Measuring ${target} accounts for "${keywords}".`);
   const done = await waitForJob(job.id);
-  printJson(done);
+  const progress = done.progress;
+  const result = asRecord(done.result);
+  const exhausted = result?.exhausted === true;
+  const note = typeof result?.note === "string" ? result.note : "";
+  log(
+    `status ${done.status}, measured ${progress.measured} / target ${progress.target}, passed ${progress.passed}, nearMiss ${progress.nearMiss}, failed ${progress.failed}${exhausted ? ` — search exhausted (${note})` : ""}`,
+  );
+  if (args.includes("--json")) {
+    printJson(done);
+  }
   if (done.status === "needs_human") {
     log(done.needsHumanReason ?? "Clear the check in Chrome, then rerun.");
     process.exitCode = 2;
@@ -101,6 +115,14 @@ async function discover(args: string[]): Promise<void> {
   if (done.status === "error") {
     process.exitCode = 1;
   }
+  process.exit(process.exitCode ?? 0);
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return null;
 }
 
 function printJson(value: unknown): void {

@@ -195,6 +195,11 @@ export function upsertPosts(posts: TikTokPost[]): void {
   tx(posts);
 }
 
+export function listMeasuredUsernames(): string[] {
+  const rows = getDb().prepare("SELECT username FROM accounts").all() as Array<{ username: string }>;
+  return rows.map((row) => row.username.toLowerCase());
+}
+
 export function listLibrary(query: LibraryQuery = {}): StoredAccount[] {
   const clauses: string[] = [];
   const params: unknown[] = [];

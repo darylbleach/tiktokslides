@@ -30,7 +30,7 @@ Other useful first-niche keywords: `wedding guest list`, `seating chart`, `save 
 
 1. Search TikTok the way you would, from your logged-in Chrome.
 2. Measure accounts: slideshow share, median views, views per follower, cadence.
-3. Verdicts: passed / near miss (with margin) / failed.
+3. Verdicts: passed / near miss (with margin) / failed. Defaults are tuned for wedding slideshows: ≥50% slideshow share, ≥1,000 median slideshow views, ≥0.2 views/follower, ≥0.3 posts/week.
 4. Download slideshow slides, and render simple 1080×1920 PNG drafts.
 
 ## MCP tools
@@ -52,7 +52,7 @@ When TikTok changes markup or JSON, patch `src/tiktok/` and rerun.
 ```bash
 pnpm discover "wedding planning" --target 20
 pnpm job <id>
-pnpm library --niche wedding --verdict passed --min-views 10000
+pnpm library --niche wedding --verdict passed --min-views 1000
 pnpm account plannerjane
 pnpm download https://www.tiktok.com/@user/photo/123
 pnpm formats --name "Numbered guest-list hook" --posts 123,456

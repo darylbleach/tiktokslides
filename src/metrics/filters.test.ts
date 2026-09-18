@@ -57,4 +57,28 @@ describe("evaluateAccount", () => {
     );
     assert.equal(result.verdict, "failed");
   });
+
+  it("passes a bride-club-class wedding slideshow account", () => {
+    const result = evaluateAccount(
+      { ...base, slideshowShare: 1, medianViews: 2956, viewsPerFollower: 0.246, postsPerWeek: 20.5 },
+      DEFAULT_FILTERS,
+    );
+    assert.equal(result.verdict, "passed");
+  });
+
+  it("near-misses a lower-view wedding slideshow account", () => {
+    const result = evaluateAccount(
+      { ...base, slideshowShare: 0.6, medianViews: 968, viewsPerFollower: 3.67, postsPerWeek: 5.5 },
+      DEFAULT_FILTERS,
+    );
+    assert.equal(result.verdict, "near_miss");
+  });
+
+  it("does not fail a strong slideshow account that posts every few weeks", () => {
+    const result = evaluateAccount(
+      { ...base, slideshowShare: 0.68, medianViews: 28_700, viewsPerFollower: 8.55, postsPerWeek: 0.34 },
+      DEFAULT_FILTERS,
+    );
+    assert.equal(result.verdict, "passed");
+  });
 });

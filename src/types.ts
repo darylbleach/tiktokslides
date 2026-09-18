@@ -10,9 +10,9 @@ export type Filters = {
 
 export const DEFAULT_FILTERS: Filters = {
   minSlideshowShare: 0.5,
-  minMedianViews: 10_000,
-  minViewsPerFollower: 0.5,
-  minPostsPerWeek: 1,
+  minMedianViews: 1_000,
+  minViewsPerFollower: 0.2,
+  minPostsPerWeek: 0.3,
   nearMissMargin: 0.1,
 };
 
