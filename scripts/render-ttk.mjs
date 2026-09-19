@@ -15,7 +15,7 @@ const posts = [
     eyebrow: "Guest list",
     headline: "You do not have to invite them",
     bullets: [
-      "Your mum's colleague from 2009",
+      "Your mum's colleague from\u00a02009",
       "A plus one for someone who is single and fine",
       "The cousin you have not seen since you were twelve",
       "Work people you would not grab a pint with",
@@ -28,7 +28,7 @@ const posts = [
     eyebrow: "Table planner",
     headline: "The seating chart is not the first job",
     bullets: [
-      "Lock the guest list and RSVPs first. Then sit people. Tie The Knot keeps both in one list.",
+      "Lock the guest list and RSVPs first. Then sit people. Tie The Knot keeps both in one\u00a0list.",
     ],
   },
   {

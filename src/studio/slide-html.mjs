@@ -91,14 +91,14 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
     .wordmark {
       margin: 0;
       font-family: ${TTK_BRAND.display};
-      font-size: 40px;
+      font-size: 44px;
       font-weight: 400;
       letter-spacing: -0.03em;
       line-height: 1;
       color: var(--ink);
     }
     .eyebrow {
-      margin-top: 56px;
+      margin: 0 0 28px;
       font-size: 24px;
       font-weight: 500;
       letter-spacing: 0.22em;
@@ -110,33 +110,30 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 24px 0 80px;
-    }
-    .content.point {
-      justify-content: flex-end;
-      padding-bottom: 120px;
+      padding: 40px 0 64px;
     }
     .number {
       font-family: ${TTK_BRAND.display};
-      font-size: 128px;
+      font-size: 132px;
       font-weight: 400;
       line-height: 0.85;
       letter-spacing: -0.04em;
-      color: var(--gold);
-      margin: 0 0 28px;
+      color: var(--gold-deep);
+      margin: 0 0 24px;
     }
     h1 {
       margin: 0;
-      max-width: 860px;
+      max-width: 880px;
       font-family: ${TTK_BRAND.display};
-      font-size: 84px;
+      font-size: 96px;
       font-weight: 400;
-      line-height: 1.07;
+      line-height: 1.06;
       letter-spacing: -0.03em;
       color: var(--ink);
+      text-wrap: pretty;
     }
     .point h1 {
-      font-size: 58px;
+      font-size: 62px;
       line-height: 1.14;
       letter-spacing: -0.02em;
     }
@@ -155,11 +152,12 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
     }
     .body {
       margin: 0;
-      max-width: 820px;
-      font-size: 38px;
+      max-width: 840px;
+      font-size: 42px;
       font-weight: 400;
-      line-height: 1.4;
-      color: rgba(26, 23, 20, 0.64);
+      line-height: 1.38;
+      color: rgba(26, 23, 20, 0.72);
+      text-wrap: pretty;
     }
     .footer {
       display: flex;
@@ -184,9 +182,9 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
     <div class="inner">
       <div class="mast">
         <p class="wordmark">${escapeHtml(wordmark)}</p>
-        ${eyebrowHtml}
       </div>
       <div class="content ${kind}">
+        ${eyebrowHtml}
         ${numberHtml}
         <h1>${escapeHtml(headline)}</h1>
         ${ruleHtml}
