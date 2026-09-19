@@ -25,8 +25,8 @@ export const UNSPLASH_PHOTOS = {
   },
   guest_names_card: {
     id: "photo-1738898179451-b5fc497f9f8e",
-    photographer: "Blue",
-    username: "freeblue",
+    photographer: "Micah & Sammie Chaffin",
+    username: "micahandsammiechaffin",
     page: "https://unsplash.com/photos/a-close-up-of-a-wedding-stationery-on-a-table-AuZp_2LGSCs",
     alt: "Close-up of a wedding invitation with guest names on the card",
     topic: "guest names",
@@ -88,19 +88,11 @@ export const UNSPLASH_PHOTOS = {
     topic: "stationery",
   },
   calendar_dates: {
-    id: "photo-1506784983877-45594efa4cbe",
-    photographer: "Eric Rothermel",
-    username: "ericrotherm",
-    page: "https://unsplash.com/photos/calendar-in-close-up-photography-l4YwsF54fEA",
-    alt: "Close-up of a calendar with dates marked",
-    topic: "calendar",
-  },
-  calendar_numbers: {
     id: "photo-1717435860330-f9fc106809c3",
     photographer: "Shoham Avisrur",
     username: "shoham_avisrur",
     page: "https://unsplash.com/photos/a-close-up-of-a-paper-with-numbers-on-it-0AO1S25tSwM",
-    alt: "Close-up of a paper calendar with numbered dates",
+    alt: "Save-the-date cards showing the wedding date 04.06.2024",
     topic: "calendar",
   },
   stationery_ribbon: {
@@ -121,8 +113,8 @@ export const UNSPLASH_PHOTOS = {
   },
   invitations_greenery: {
     id: "photo-1742581659446-6260fc707e7d",
-    photographer: "Blue",
-    username: "freeblue",
+    photographer: "Micah & Sammie Chaffin",
+    username: "micahandsammiechaffin",
     page: "https://unsplash.com/photos/wedding-invitations-and-stationery-displayed-with-greenery-5ZribvTyQVQ",
     alt: "Wedding invitations and stationery displayed with greenery",
     topic: "save-the-date card",
@@ -131,8 +123,8 @@ export const UNSPLASH_PHOTOS = {
     id: "photo-1519741497674-611481863552",
     photographer: "Nathan Dumlao",
     username: "nate_dumlao",
-    page: "https://unsplash.com/photos/bride-and-groom-walking-on-the-street-during-daytime-L2cxSuKjbX0",
-    alt: "Bride and groom walking together in an editorial wedding portrait",
+    page: "https://unsplash.com/photos/man-and-woman-kissing-holding-wedding-bouquet-1q7MmXKJyYc",
+    alt: "Couple in wedding clothes with a bouquet at golden hour",
     topic: "date/couple editorial",
   },
   couple_hands: {
@@ -165,7 +157,7 @@ export const TTK_SLIDE_PHOTOS = {
 };
 
 const FALLBACKS = {
-  calendar_dates: "calendar_numbers",
+  calendar_dates: "save_the_date_card",
   dinner_guests: "wedding_guests_toast",
   reception_table: "place_setting",
   save_the_date_card: "invitations_greenery",
