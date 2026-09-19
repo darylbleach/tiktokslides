@@ -1,4 +1,4 @@
-/** Computed tokens from tietheknot.uk (homepage + /wedding-rsvp-uk + /wedding-table-planner). Instagram was login-walled. */
+/** Tie The Knot tokens from tietheknot.uk: Playfair wordmark, Inter UI, cream/ink/gold. Not the rejected invitation-card frame. */
 export const TTK_BRAND = {
   cream: "#F7F4EF",
   ink: "#1A1714",
@@ -9,7 +9,6 @@ export const TTK_BRAND = {
   white: "#FFFFFF",
   muted: "rgba(26, 23, 20, 0.58)",
   playfair: '"Playfair Display", Georgia, serif',
-  georgia: "Georgia, 'Times New Roman', serif",
   inter: 'Inter, "Inter Fallback", "Helvetica Neue", Arial, sans-serif',
   wordmark: "Tie The Knot",
   footer: "tietheknot.uk",
@@ -63,7 +62,11 @@ function widgetFor(options) {
         <p class="product-label">Table planner</p>
         <p class="product-meta">78 guests seated</p>
       </div>
-      <div class="top-table">Top table</div>
+      <div class="top-table">
+        <span class="top-label">Top table</span>
+        <span class="top-names">Rebecca · Samantha</span>
+        <span class="top-names">Graham · Charlotte</span>
+      </div>
       <div class="table-grid">${tables}</div>
     </section>`;
   }
@@ -93,11 +96,24 @@ function chromePills(secondary = TTK_BRAND.footer) {
   </div>`;
 }
 
+function siteFooter() {
+  return `<footer class="site-foot">
+    <a class="wordmark">${escapeHtml(TTK_BRAND.wordmark)}</a>
+    <p>A UK wedding website with the planning board, budget tracker, and table planner built in.</p>
+    <a>hello@${escapeHtml(TTK_BRAND.footer)}</a>
+  </footer>`;
+}
+
+function heroHtml(src, alt) {
+  if (!src) return "";
+  return `<div class="hero"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" /></div>`;
+}
+
 /**
  * @param {string} headline
  * @param {string} [body]
  * @param {string} [kicker]
- * @param {{ kind?: "cover" | "point" | "hook"; number?: string; eyebrow?: string; widget?: string; rows?: string[][]; cardTitle?: string; cardBody?: string }} [options]
+ * @param {{ kind?: "cover" | "point" | "hook"; number?: string; eyebrow?: string; widget?: string; rows?: string[][]; cardTitle?: string; cardBody?: string; photoSrc?: string; photoAlt?: string }} [options]
  */
 export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
   const kind = options.kind ?? (options.number ? "point" : body ? "cover" : "cover");
@@ -105,11 +121,12 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
   const eyebrow = options.eyebrow ?? "";
   void kicker;
 
+  const photoSrc =
+    options.photoSrc ?? (kind === "cover" || kind === "hook" ? TTK_BRAND.hero : "");
+  const photoAlt = options.photoAlt ?? TTK_BRAND.heroAlt;
+  const hero = heroHtml(photoSrc, photoAlt);
+
   const widget = widgetFor({ ...options, eyebrow, number });
-  const hero =
-    kind === "cover"
-      ? `<div class="hero"><img src="${TTK_BRAND.hero}" alt="${escapeHtml(TTK_BRAND.heroAlt)}" /></div>`
-      : "";
   const count = kind === "cover" && body ? `<p class="lede">${escapeHtml(body)}</p>` : "";
   const hookBody = kind === "hook" && body ? `<p class="lede">${escapeHtml(body)}</p>` : "";
   const pointCard =
@@ -124,10 +141,7 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
         })
       : widget;
 
-  const headlineHtml =
-    kind === "point"
-      ? ""
-      : `<h1>${escapeHtml(headline)}</h1>`;
+  const headlineHtml = kind === "point" ? "" : `<h1>${escapeHtml(headline)}</h1>`;
 
   return `<!doctype html>
 <html lang="en-GB">
@@ -178,12 +192,16 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
     }
     .wordmark {
       font-family: ${TTK_BRAND.playfair};
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 400;
-      letter-spacing: -0.8px;
+      letter-spacing: -0.7px;
       line-height: 1;
       color: var(--ink);
       text-decoration: none;
+    }
+    .nav .btn-fill {
+      font-size: 18px;
+      padding: 12px 22px;
     }
     .btn-fill {
       display: inline-flex;
@@ -222,18 +240,18 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       min-height: 0;
     }
     .copy {
-      padding: 56px 56px 32px;
+      padding: 48px 56px 28px;
     }
     .cover .copy { padding: 48px 56px 28px; }
-    .hook .copy { padding: 48px 56px 24px; }
+    .hook .copy { padding: 40px 56px 20px; }
     .point .copy {
       flex: 0 0 auto;
-      padding: 48px 56px 16px;
+      padding: 32px 56px 12px;
     }
     .eyebrow {
       margin: 0 0 20px;
       font-size: 22px;
-      font-weight: 400;
+      font-weight: 500;
       letter-spacing: 0.56px;
       line-height: 1.2;
       text-transform: uppercase;
@@ -249,9 +267,9 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       color: var(--ink);
       text-wrap: pretty;
     }
-    .hook h1 { font-size: 64px; letter-spacing: -1.4px; }
+    .hook h1 { font-size: 58px; letter-spacing: -1.4px; }
     .lede {
-      margin: 28px 0 0;
+      margin: 24px 0 0;
       font-size: 28px;
       font-weight: 400;
       line-height: 1.45;
@@ -262,13 +280,24 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
     .pills {
       display: flex;
       gap: 16px;
-      margin-top: 36px;
+      margin-top: 28px;
       flex-wrap: wrap;
     }
     .hero {
+      overflow: hidden;
+      background: #d9d0c4;
+    }
+    .cover .hero {
       flex: 1;
       min-height: 720px;
-      overflow: hidden;
+    }
+    .hook .hero {
+      flex: 0 0 560px;
+      height: 560px;
+    }
+    .point .hero {
+      flex: 0 0 760px;
+      height: 760px;
     }
     .hero img {
       display: block;
@@ -281,28 +310,33 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       background: var(--white);
       border: 1px solid var(--line);
       border-radius: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       padding: 28px 32px;
-      margin: 0 56px 28px;
+      margin: 0 56px 24px;
     }
-    .point .product-card {
-      margin: 0 56px;
-      flex: 1;
+    .point .stack {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      padding: 48px 44px;
+      gap: 16px;
+      padding: 16px 56px 8px;
+      flex: 1;
+    }
+    .point .product-card {
+      margin: 0;
+      flex: 0 0 auto;
+      padding: 28px 32px;
     }
     .hook .product-card {
       flex: 1;
-      margin: 8px 56px 56px;
+      margin: 16px 56px 16px;
+      min-height: 0;
     }
     .product-head {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .product-label {
       margin: 0;
@@ -323,7 +357,7 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       align-items: center;
       justify-content: space-between;
       gap: 20px;
-      padding: 18px 0;
+      padding: 16px 0;
       border-top: 1px solid var(--line);
     }
     .guest-name {
@@ -350,28 +384,41 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       border: 1px solid var(--line);
       border-radius: 16px;
       text-align: center;
-      font-size: 24px;
-      font-weight: 500;
-      padding: 18px;
-      margin-bottom: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
       color: var(--ink);
+    }
+    .top-label {
+      display: block;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .top-names {
+      display: block;
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 1.35;
     }
     .table-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
     .table-chip {
       background: var(--cream);
       border: 1px solid var(--line);
       border-radius: 16px;
-      padding: 16px 8px;
+      padding: 12px 8px;
       text-align: center;
     }
-    .table-id { display: block; font-size: 22px; font-weight: 600; color: var(--ink); }
-    .table-n { display: block; font-size: 16px; color: var(--muted); margin-top: 4px; }
+    .table-id { display: block; font-size: 20px; font-weight: 600; color: var(--ink); }
+    .table-n { display: block; font-size: 15px; color: var(--muted); margin-top: 4px; }
     .card-index {
-      margin: 0 0 16px;
+      margin: 0 0 12px;
       font-size: 22px;
       font-weight: 500;
       letter-spacing: 0.08em;
@@ -380,21 +427,40 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
     .card-title {
       margin: 0;
       font-family: ${TTK_BRAND.inter};
-      font-size: 48px;
+      font-size: 40px;
       font-weight: 500;
-      line-height: 1.2;
-      letter-spacing: -0.3px;
+      line-height: 1.25;
+      letter-spacing: -0.2px;
       color: var(--heading);
       text-wrap: pretty;
     }
     .card-body {
-      margin: 20px 0 0;
+      margin: 16px 0 0;
       font-size: 28px;
       line-height: 1.4;
       color: var(--muted);
     }
+    .site-foot {
+      margin-top: auto;
+      padding: 24px 56px 32px;
+      border-top: 1px solid rgba(181, 158, 123, 0.2);
+    }
+    .site-foot .wordmark { font-size: 28px; }
+    .site-foot p {
+      margin: 10px 0 0;
+      font-size: 20px;
+      color: var(--muted);
+      max-width: 720px;
+    }
+    .site-foot a {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--gold);
+      font-size: 20px;
+      text-decoration: none;
+    }
     .foot {
-      padding: 8px 56px 40px;
+      padding: 8px 56px 28px;
     }
   </style>
 </head>
@@ -410,8 +476,12 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
         ${kind !== "point" ? chromePills() : ""}
       </div>
       ${hero}
-      ${pointCard}
-      ${kind === "point" ? `<div class="foot">${chromePills()}</div>` : ""}
+      ${
+        kind === "point"
+          ? `<div class="stack">${pointCard}</div>
+      <div class="foot">${chromePills()}</div>`
+          : `${pointCard}${kind === "hook" ? "" : ""}`
+      }
     </div>
   </div>
 </body>
@@ -419,42 +489,73 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
 }
 
 /**
- * @param {{ headline: string; bullets?: string[]; layout: "hook" | "numbered_list"; eyebrow?: string }} input
+ * @param {{ headline: string; bullets?: string[]; layout: "hook" | "numbered_list"; eyebrow?: string; photos?: Array<{ src: string; alt?: string; widget?: string } | string>; photoSrc?: string; photoAlt?: string }} input
  */
 export function slidesFor(input) {
   const bullets = (input.bullets ?? []).map((item) => item.trim()).filter(Boolean);
   const eyebrow = input.eyebrow ?? "";
+  const photos = input.photos ?? [];
+
+  const photoAt = (index) => {
+    const entry = photos[index];
+    if (!entry) {
+      return {
+        photoSrc: input.photoSrc,
+        photoAlt: input.photoAlt,
+        widget: undefined,
+      };
+    }
+    if (typeof entry === "string") {
+      return { photoSrc: entry, photoAlt: input.photoAlt, widget: undefined };
+    }
+    return {
+      photoSrc: entry.src,
+      photoAlt: entry.alt ?? input.photoAlt,
+      widget: entry.widget,
+    };
+  };
+
   if (input.layout === "hook") {
+    const photo = photoAt(0);
     return [
       {
         name: "01.png",
         html: buildSlideHtml(input.headline, bullets[0] ?? "", TTK_BRAND.wordmark, {
           kind: "hook",
           eyebrow,
-          widget: "tables",
+          widget: photo.widget ?? "tables",
+          photoSrc: photo.photoSrc,
+          photoAlt: photo.photoAlt,
         }),
       },
     ];
   }
   if (input.layout === "numbered_list") {
+    const coverPhoto = photoAt(0);
     const slides = [
       {
         name: "01.png",
         html: buildSlideHtml(input.headline, bullets.length ? `${bullets.length} things` : "", TTK_BRAND.wordmark, {
           kind: "cover",
           eyebrow,
+          widget: coverPhoto.widget,
+          photoSrc: coverPhoto.photoSrc,
+          photoAlt: coverPhoto.photoAlt,
         }),
       },
     ];
     bullets.forEach((bullet, index) => {
+      const photo = photoAt(index + 1);
       slides.push({
         name: `${String(index + 2).padStart(2, "0")}.png`,
         html: buildSlideHtml(bullet, "", TTK_BRAND.wordmark, {
           kind: "point",
           number: String(index + 1).padStart(2, "0"),
           eyebrow,
-          widget: "feature",
+          widget: photo.widget ?? "feature",
           cardTitle: bullet,
+          photoSrc: photo.photoSrc,
+          photoAlt: photo.photoAlt,
         }),
       });
     });
