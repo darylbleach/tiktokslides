@@ -2,76 +2,17 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { slidesFor, waitForSlideReady } from "../src/studio/slide-html.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outRoot = path.join(root, "data", "drafts");
 const cdp = process.env.SLIDE_RESEARCH_CDP_URL ?? "http://127.0.0.1:9222";
 
-function escapeHtml(value) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
-function slideHtml(headline, body, kicker = "Tie The Knot") {
-  return `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <style>
-    html, body { margin: 0; padding: 0; width: 1080px; height: 1920px; }
-    body {
-      background: #1b1410;
-      color: #f6efe6;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .slide {
-      width: 860px;
-      min-height: 1400px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 48px;
-    }
-    .kicker {
-      font-size: 36px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #e2b57a;
-    }
-    h1 {
-      margin: 0;
-      font-size: 84px;
-      line-height: 1.05;
-      font-weight: 700;
-    }
-    p {
-      margin: 0;
-      font-size: 52px;
-      line-height: 1.25;
-      color: #f6efe6;
-    }
-  </style>
-</head>
-<body>
-  <div class="slide">
-    ${kicker ? `<div class="kicker">${escapeHtml(kicker)}</div>` : ""}
-    <h1>${escapeHtml(headline)}</h1>
-    ${body ? `<p>${escapeHtml(body)}</p>` : ""}
-  </div>
-</body>
-</html>`;
-}
-
 const posts = [
   {
     slug: "guest-list-dont-invite",
     layout: "numbered_list",
+    eyebrow: "Guest list",
     headline: "You do not have to invite them",
     bullets: [
       "Your mum's colleague from 2009",
@@ -84,6 +25,7 @@ const posts = [
   {
     slug: "seating-chart-after-rsvp",
     layout: "hook",
+    eyebrow: "Table planner",
     headline: "The seating chart is not the first job",
     bullets: [
       "Lock the guest list and RSVPs first. Then sit people. Tie The Knot keeps both in one list.",
@@ -92,6 +34,7 @@ const posts = [
   {
     slug: "save-the-date-after-list",
     layout: "numbered_list",
+    eyebrow: "Save the date",
     headline: "Do not send save the dates yet",
     bullets: [
       "If the names are still moving, the dates will too",
@@ -119,18 +62,10 @@ try {
   for (const post of posts) {
     const dir = path.join(outRoot, post.slug);
     mkdirSync(dir, { recursive: true });
-    const slides =
-      post.layout === "hook"
-        ? [{ name: "01.png", html: slideHtml(post.headline, post.bullets[0] ?? "") }]
-        : [
-            { name: "01.png", html: slideHtml(post.headline, `${post.bullets.length} things`, "List") },
-            ...post.bullets.map((bullet, index) => ({
-              name: `${String(index + 2).padStart(2, "0")}.png`,
-              html: slideHtml(`${index + 1}.`, bullet, ""),
-            })),
-          ];
+    const slides = slidesFor(post);
     for (const slide of slides) {
-      await page.setContent(slide.html, { waitUntil: "domcontentloaded" });
+      await page.setContent(slide.html, { waitUntil: "networkidle" });
+      await waitForSlideReady(page);
       await page.screenshot({
         path: path.join(dir, slide.name),
         type: "png",
@@ -139,7 +74,11 @@ try {
     }
     writeFileSync(
       path.join(dir, "copy.json"),
-      JSON.stringify({ headline: post.headline, bullets: post.bullets, layout: post.layout }, null, 2),
+      JSON.stringify(
+        { headline: post.headline, bullets: post.bullets, layout: post.layout, eyebrow: post.eyebrow },
+        null,
+        2,
+      ),
     );
     console.log(`rendered ${dir} (${slides.length} slides)`);
   }
