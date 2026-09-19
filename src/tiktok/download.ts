@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { Page } from "playwright";
 import { attachJsonSniffer, assertReadable, gotoHuman, humanDelay } from "../chrome/session.ts";
@@ -41,6 +41,10 @@ export async function downloadSlideshow(page: Page, url: string): Promise<Downlo
     const files: string[] = [];
     for (const [index, imageUrl] of imageUrls.entries()) {
       const file = path.join(dir, `${String(index + 1).padStart(2, "0")}.jpg`);
+      if (existsSync(file) && statSync(file).size > 1000) {
+        files.push(file);
+        continue;
+      }
       const buffer = await fetchImage(page, imageUrl);
       writeFileSync(file, buffer);
       files.push(file);
@@ -52,14 +56,23 @@ export async function downloadSlideshow(page: Page, url: string): Promise<Downlo
   }
 }
 
-async function fetchImage(page: Page, imageUrl: string): Promise<Buffer> {
-  const response = await page.request.get(imageUrl, {
-    headers: { Referer: "https://www.tiktok.com/" },
-  });
-  if (!response.ok()) {
-    throw new Error(`Failed to download slide image (${response.status()}).`);
+async function fetchImage(page: Page, imageUrl: string, attempt = 1): Promise<Buffer> {
+  try {
+    const response = await page.request.get(imageUrl, {
+      headers: { Referer: "https://www.tiktok.com/" },
+      timeout: 30_000,
+    });
+    if (!response.ok()) {
+      throw new Error(`Failed to download slide image (${response.status()}).`);
+    }
+    return Buffer.from(await response.body());
+  } catch (error) {
+    if (attempt >= 4) {
+      throw error;
+    }
+    await humanDelay(700 * attempt, 1400 * attempt);
+    return fetchImage(page, imageUrl, attempt + 1);
   }
-  return Buffer.from(await response.body());
 }
 
 async function imageUrlsFromDom(page: Page): Promise<string[]> {

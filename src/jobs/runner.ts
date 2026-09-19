@@ -218,9 +218,13 @@ export async function runDownload(url: string): Promise<Job> {
   updateJob(job.id, { status: "running" });
   try {
     const session = await connectChrome();
-    const page = await researchPage(session);
-    const result = await downloadSlideshow(page, url);
-    return updateJob(job.id, { status: "done", result });
+    const page = await session.context.newPage();
+    try {
+      const result = await downloadSlideshow(page, url);
+      return updateJob(job.id, { status: "done", result });
+    } finally {
+      await page.close();
+    }
   } catch (error) {
     if (error instanceof CaptchaError || error instanceof LoginRequiredError) {
       return updateJob(job.id, { status: "needs_human", needsHumanReason: error.message });

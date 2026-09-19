@@ -22,6 +22,8 @@ try {
   const message = error instanceof Error ? error.message : String(error);
   log(message);
   process.exitCode = 1;
+} finally {
+  process.exit(process.exitCode ?? 0);
 }
 
 async function main(cmd: string | undefined, args: string[]): Promise<void> {
