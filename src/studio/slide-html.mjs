@@ -96,14 +96,6 @@ function chromePills(secondary = TTK_BRAND.footer) {
   </div>`;
 }
 
-function siteFooter() {
-  return `<footer class="site-foot">
-    <a class="wordmark">${escapeHtml(TTK_BRAND.wordmark)}</a>
-    <p>A UK wedding website with the planning board, budget tracker, and table planner built in.</p>
-    <a>hello@${escapeHtml(TTK_BRAND.footer)}</a>
-  </footer>`;
-}
-
 function heroHtml(src, alt) {
   if (!src) return "";
   return `<div class="hero"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" /></div>`;
@@ -480,7 +472,7 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
         kind === "point"
           ? `<div class="stack">${pointCard}</div>
       <div class="foot">${chromePills()}</div>`
-          : `${pointCard}${kind === "hook" ? "" : ""}`
+          : pointCard
       }
     </div>
   </div>

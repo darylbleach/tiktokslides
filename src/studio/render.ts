@@ -7,11 +7,20 @@ import { buildSlideHtml, slidesFor as slidesForHtml, waitForSlideReady } from ".
 
 export type DraftLayout = "hook" | "numbered_list";
 
+export type SlidePhoto = {
+  src: string;
+  alt?: string;
+  widget?: string;
+};
+
 export type RenderInput = {
   headline: string;
   bullets?: string[];
   layout: DraftLayout;
   eyebrow?: string;
+  photos?: Array<SlidePhoto | string>;
+  photoSrc?: string;
+  photoAlt?: string;
 };
 
 export type RenderResult = {

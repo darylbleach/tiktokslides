@@ -1,16 +1,31 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { slidesFor, waitForSlideReady } from "../src/studio/slide-html.mjs";
+import {
+  TTK_SLIDE_PHOTOS,
+  creditFor,
+  ensurePhoto,
+  photoDataUri,
+  UNSPLASH_PHOTOS,
+} from "../src/studio/unsplash-photos.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outRoot = path.join(root, "data", "drafts");
 const cdp = process.env.SLIDE_RESEARCH_CDP_URL ?? "http://127.0.0.1:9222";
 
+const STORE_DIRS = [
+  "/cursor/stores/user",
+  "/cursor/stores/user/media",
+  "/cursor/stores/self/media",
+  "/cursor/stores/self/artifacts",
+];
+
 const posts = [
   {
     slug: "guest-list-dont-invite",
+    exportPrefix: "ttk-guest-list",
     layout: "numbered_list",
     eyebrow: "Guest list",
     headline: "You do not have to invite them",
@@ -24,6 +39,7 @@ const posts = [
   },
   {
     slug: "seating-chart-after-rsvp",
+    exportPrefix: "ttk-seating",
     layout: "hook",
     eyebrow: "Table planner",
     headline: "The seating chart is not the first job",
@@ -33,6 +49,7 @@ const posts = [
   },
   {
     slug: "save-the-date-after-list",
+    exportPrefix: "ttk-save-the-date",
     layout: "numbered_list",
     eyebrow: "Save the date",
     headline: "Do not send save the dates yet",
@@ -44,6 +61,37 @@ const posts = [
     ],
   },
 ];
+
+function copyRendered(file, destName) {
+  for (const dir of STORE_DIRS) {
+    mkdirSync(dir, { recursive: true });
+    copyFileSync(file, path.join(dir, destName));
+  }
+}
+
+const allCredits = [];
+
+for (const post of posts) {
+  const keys = TTK_SLIDE_PHOTOS[post.slug];
+  if (!keys) throw new Error(`No Unsplash mapping for ${post.slug}`);
+  const photos = [];
+  for (const key of keys) {
+    const file = await ensurePhoto(key);
+    const meta = UNSPLASH_PHOTOS[key];
+    photos.push({
+      src: photoDataUri(file),
+      alt: meta.alt,
+      widget: post.layout === "hook" ? "tables" : undefined,
+    });
+    allCredits.push({
+      post: post.slug,
+      slide: photos.length,
+      ...creditFor(key),
+      file: path.relative(root, file),
+    });
+  }
+  post.photos = photos;
+}
 
 let browser;
 let ownedBrowser = false;
@@ -63,15 +111,20 @@ try {
     const dir = path.join(outRoot, post.slug);
     mkdirSync(dir, { recursive: true });
     const slides = slidesFor(post);
+    const rendered = [];
     for (const slide of slides) {
+      const dest = path.join(dir, slide.name);
       await page.setContent(slide.html, { waitUntil: "networkidle" });
       await waitForSlideReady(page);
       await page.screenshot({
-        path: path.join(dir, slide.name),
+        path: dest,
         type: "png",
         clip: { x: 0, y: 0, width: 1080, height: 1920 },
       });
+      rendered.push(dest);
+      copyRendered(dest, `${post.exportPrefix}-${slide.name}`);
     }
+    const postCredits = allCredits.filter((row) => row.post === post.slug);
     writeFileSync(
       path.join(dir, "copy.json"),
       JSON.stringify(
@@ -80,8 +133,11 @@ try {
         2,
       ),
     );
+    writeFileSync(path.join(dir, "credits.json"), JSON.stringify(postCredits, null, 2));
     console.log(`rendered ${dir} (${slides.length} slides)`);
   }
+  mkdirSync(outRoot, { recursive: true });
+  writeFileSync(path.join(outRoot, "credits.json"), JSON.stringify(allCredits, null, 2));
 } finally {
   await page.close();
   if (ownedBrowser) {

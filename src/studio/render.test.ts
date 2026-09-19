@@ -17,6 +17,8 @@ describe("slidesFor", () => {
     assert.match(slides[0]!.html, /Table planner/);
     assert.match(slides[0]!.html, /#F7F4EF/);
     assert.match(slides[0]!.html, /#B59E7B/);
+    assert.match(slides[0]!.html, /Playfair Display/);
+    assert.match(slides[0]!.html, /<img /);
     assert.doesNotMatch(slides[0]!.html, /border:\s*1px solid rgba\(181/);
   });
 
@@ -36,6 +38,25 @@ describe("slidesFor", () => {
     assert.match(slides[1]!.html, /Plus-ones last/);
     assert.match(slides[1]!.html, /card-title/);
     assert.match(slides[2]!.html, /Kids table is a trap/);
+  });
+
+  it("puts a topic photo on every numbered slide", () => {
+    const slides = slidesFor({
+      headline: "Guest list rules",
+      bullets: ["Plus-ones last", "Kids table is a trap"],
+      layout: "numbered_list",
+      eyebrow: "Guest list",
+      photos: [
+        { src: "data:image/jpeg;base64,aaa", alt: "Wedding invitations" },
+        { src: "data:image/jpeg;base64,bbb", alt: "Guest names on a card" },
+        { src: "data:image/jpeg;base64,ccc", alt: "Dinner guests" },
+      ],
+    });
+    assert.equal(slides.length, 3);
+    assert.match(slides[0]!.html, /Wedding invitations/);
+    assert.match(slides[1]!.html, /Guest names on a card/);
+    assert.match(slides[2]!.html, /Dinner guests/);
+    assert.doesNotMatch(slides[0]!.html, /homepage-hero\.jpg/);
   });
 });
 
