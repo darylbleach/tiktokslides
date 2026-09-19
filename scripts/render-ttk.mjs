@@ -102,8 +102,16 @@ const posts = [
   },
 ];
 
-const browser = await chromium.connectOverCDP(cdp);
-const context = browser.contexts()[0] ?? (await browser.newContext({ viewport: { width: 1080, height: 1920 } }));
+let browser;
+let ownedBrowser = false;
+try {
+  browser = await chromium.connectOverCDP(cdp);
+} catch {
+  browser = await chromium.launch({ headless: true });
+  ownedBrowser = true;
+}
+const context =
+  browser.contexts()[0] ?? (await browser.newContext({ viewport: { width: 1080, height: 1920 } }));
 const page = await context.newPage();
 await page.setViewportSize({ width: 1080, height: 1920 });
 
@@ -137,4 +145,7 @@ try {
   }
 } finally {
   await page.close();
+  if (ownedBrowser) {
+    await browser.close();
+  }
 }
