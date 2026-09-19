@@ -82,6 +82,7 @@ for (const post of posts) {
       src: photoDataUri(file),
       alt: meta.alt,
       widget: post.layout === "hook" ? "tables" : undefined,
+      position: meta.position,
     });
     allCredits.push({
       post: post.slug,

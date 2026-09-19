@@ -30,6 +30,7 @@ export const UNSPLASH_PHOTOS = {
     page: "https://unsplash.com/photos/a-close-up-of-a-wedding-stationery-on-a-table-AuZp_2LGSCs",
     alt: "Close-up of a wedding invitation with guest names on the card",
     topic: "guest names",
+    position: "78% 40%",
   },
   wedding_guests_toast: {
     id: "photo-1761499101934-4c79d09b14e9",
@@ -54,6 +55,7 @@ export const UNSPLASH_PHOTOS = {
     page: "https://unsplash.com/photos/a-close-up-of-a-wedding-suite-on-a-bed-BiT7NBELhTg",
     alt: "Wedding invitation suite showing couple names on the card",
     topic: "invitations",
+    position: "80% 45%",
   },
   reception_table: {
     id: "photo-1769812343775-85a27e6a076c",
@@ -62,6 +64,7 @@ export const UNSPLASH_PHOTOS = {
     page: "https://unsplash.com/photos/elegant-wedding-reception-table-with-floral-centerpiece-and-chairs-QvprbCoOkLY",
     alt: "Wedding reception table with floral centrepiece, chairs and place settings",
     topic: "table",
+    position: "center 70%",
   },
   place_setting: {
     id: "photo-1522413452208-996ff3f3e740",

@@ -96,9 +96,10 @@ function chromePills(secondary = TTK_BRAND.footer) {
   </div>`;
 }
 
-function heroHtml(src, alt) {
+function heroHtml(src, alt, position) {
   if (!src) return "";
-  return `<div class="hero"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" /></div>`;
+  const pos = position ? ` style="--photo-pos: ${escapeHtml(position)}"` : "";
+  return `<div class="hero"${pos}><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" /></div>`;
 }
 
 /**
@@ -116,7 +117,7 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
   const photoSrc =
     options.photoSrc ?? (kind === "cover" || kind === "hook" ? TTK_BRAND.hero : "");
   const photoAlt = options.photoAlt ?? TTK_BRAND.heroAlt;
-  const hero = heroHtml(photoSrc, photoAlt);
+  const hero = heroHtml(photoSrc, photoAlt, options.photoPosition);
 
   const widget = widgetFor({ ...options, eyebrow, number });
   const count = kind === "cover" && body ? `<p class="lede">${escapeHtml(body)}</p>` : "";
@@ -284,19 +285,19 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       min-height: 720px;
     }
     .hook .hero {
-      flex: 0 0 560px;
-      height: 560px;
+      flex: 1;
+      min-height: 420px;
     }
     .point .hero {
-      flex: 0 0 760px;
-      height: 760px;
+      flex: 1;
+      min-height: 720px;
     }
     .hero img {
       display: block;
       width: 1080px;
       height: 100%;
       object-fit: cover;
-      object-position: center 30%;
+      object-position: var(--photo-pos, center 30%);
     }
     .product-card {
       background: var(--white);
@@ -311,7 +312,7 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       flex-direction: column;
       gap: 16px;
       padding: 16px 56px 8px;
-      flex: 1;
+      flex: 0 0 auto;
     }
     .point .product-card {
       margin: 0;
@@ -319,9 +320,8 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       padding: 28px 32px;
     }
     .hook .product-card {
-      flex: 1;
+      flex: 0 0 auto;
       margin: 16px 56px 16px;
-      min-height: 0;
     }
     .product-head {
       display: flex;
@@ -498,12 +498,13 @@ export function slidesFor(input) {
       };
     }
     if (typeof entry === "string") {
-      return { photoSrc: entry, photoAlt: input.photoAlt, widget: undefined };
+      return { photoSrc: entry, photoAlt: input.photoAlt, widget: undefined, photoPosition: undefined };
     }
     return {
       photoSrc: entry.src,
       photoAlt: entry.alt ?? input.photoAlt,
       widget: entry.widget,
+      photoPosition: entry.position,
     };
   };
 
@@ -518,6 +519,7 @@ export function slidesFor(input) {
           widget: photo.widget ?? "tables",
           photoSrc: photo.photoSrc,
           photoAlt: photo.photoAlt,
+          photoPosition: photo.photoPosition,
         }),
       },
     ];
@@ -533,6 +535,7 @@ export function slidesFor(input) {
           widget: coverPhoto.widget,
           photoSrc: coverPhoto.photoSrc,
           photoAlt: coverPhoto.photoAlt,
+          photoPosition: coverPhoto.photoPosition,
         }),
       },
     ];
@@ -548,6 +551,7 @@ export function slidesFor(input) {
           cardTitle: bullet,
           photoSrc: photo.photoSrc,
           photoAlt: photo.photoAlt,
+          photoPosition: photo.photoPosition,
         }),
       });
     });
