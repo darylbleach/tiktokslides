@@ -16,6 +16,7 @@ const outRoot = path.join(root, "data", "drafts");
 const cdp = process.env.SLIDE_RESEARCH_CDP_URL ?? "http://127.0.0.1:9222";
 
 const STORE_DIRS = [
+  path.join(root, "previews"),
   "/cursor/stores/user",
   "/cursor/stores/user/media",
   "/cursor/stores/self/media",
