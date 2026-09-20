@@ -39,7 +39,7 @@ function widgetFor(options) {
       .map(
         ([name, status]) => `<div class="guest-row">
         <span class="guest-name">${escapeHtml(name)}</span>
-        <span class="chip ${status === "No" ? "chip-outline" : ""}">${escapeHtml(status)}</span>
+        <span class="guest-status">${escapeHtml(status)}</span>
       </div>`,
       )
       .join("");
@@ -54,7 +54,7 @@ function widgetFor(options) {
   if (kind === "tables") {
     const tables = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"]
       .map(
-        (id) => `<div class="table-chip"><span class="table-id">${id}</span><span class="table-n">6 guests</span></div>`,
+        (id) => `<div class="table-cell"><span class="table-id">${id}</span><span class="table-n">6 guests</span></div>`,
       )
       .join("");
     return `<section class="product-card">
@@ -83,17 +83,9 @@ function widgetFor(options) {
 }
 
 function chromeNav() {
-  return `<nav class="nav">
-    <a class="wordmark">${escapeHtml(TTK_BRAND.wordmark)}</a>
-    <a class="btn-fill">Start free</a>
-  </nav>`;
-}
-
-function chromePills(secondary = TTK_BRAND.footer) {
-  return `<div class="pills">
-    <a class="btn-fill">Start free</a>
-    <a class="btn-outline">${escapeHtml(secondary)}</a>
-  </div>`;
+  return `<header class="nav">
+    <p class="wordmark">${escapeHtml(TTK_BRAND.wordmark)}</p>
+  </header>`;
 }
 
 function heroHtml(src, alt, position) {
@@ -178,53 +170,18 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       flex: 0 0 96px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       padding: 0 48px;
       background: rgba(247, 244, 239, 0.95);
       border-bottom: 1px solid rgba(181, 158, 123, 0.2);
     }
     .wordmark {
+      margin: 0;
       font-family: ${TTK_BRAND.playfair};
       font-size: 28px;
       font-weight: 400;
       letter-spacing: -0.7px;
       line-height: 1;
       color: var(--ink);
-      text-decoration: none;
-    }
-    .nav .btn-fill {
-      font-size: 18px;
-      padding: 12px 22px;
-    }
-    .btn-fill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--gold);
-      color: var(--white);
-      font-family: ${TTK_BRAND.inter};
-      font-size: 22px;
-      font-weight: 500;
-      line-height: 1;
-      padding: 16px 28px;
-      border-radius: 999px;
-      text-decoration: none;
-      border: 0;
-    }
-    .btn-outline {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      color: var(--gold);
-      font-family: ${TTK_BRAND.inter};
-      font-size: 22px;
-      font-weight: 500;
-      line-height: 1;
-      padding: 16px 28px;
-      border-radius: 999px;
-      text-decoration: none;
-      border: 1px solid var(--gold);
     }
     .main {
       flex: 1;
@@ -270,12 +227,6 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       max-width: 920px;
       text-wrap: pretty;
     }
-    .pills {
-      display: flex;
-      gap: 16px;
-      margin-top: 28px;
-      flex-wrap: wrap;
-    }
     .hero {
       overflow: hidden;
       background: #d9d0c4;
@@ -311,7 +262,7 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      padding: 16px 56px 8px;
+      padding: 16px 56px 36px;
       flex: 0 0 auto;
     }
     .point .product-card {
@@ -357,19 +308,11 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       font-weight: 500;
       color: var(--ink);
     }
-    .chip {
+    .guest-status {
       flex: 0 0 auto;
-      font-size: 18px;
-      font-weight: 500;
-      color: var(--white);
-      background: var(--gold);
-      border-radius: 999px;
-      padding: 8px 16px;
-    }
-    .chip-outline {
-      background: transparent;
-      color: var(--gold);
-      border: 1px solid var(--gold);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--muted);
     }
     .top-table {
       background: var(--cream);
@@ -398,14 +341,16 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
     .table-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 10px;
+      gap: 0;
+      border-top: 1px solid var(--line);
     }
-    .table-chip {
-      background: var(--cream);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px 8px;
+    .table-cell {
+      padding: 14px 8px 12px;
       text-align: center;
+      border-bottom: 1px solid var(--line);
+    }
+    .table-cell:not(:nth-child(4n)) {
+      border-right: 1px solid var(--line);
     }
     .table-id { display: block; font-size: 20px; font-weight: 600; color: var(--ink); }
     .table-n { display: block; font-size: 15px; color: var(--muted); margin-top: 4px; }
@@ -432,28 +377,6 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
       line-height: 1.4;
       color: var(--muted);
     }
-    .site-foot {
-      margin-top: auto;
-      padding: 24px 56px 32px;
-      border-top: 1px solid rgba(181, 158, 123, 0.2);
-    }
-    .site-foot .wordmark { font-size: 28px; }
-    .site-foot p {
-      margin: 10px 0 0;
-      font-size: 20px;
-      color: var(--muted);
-      max-width: 720px;
-    }
-    .site-foot a {
-      display: inline-block;
-      margin-top: 10px;
-      color: var(--gold);
-      font-size: 20px;
-      text-decoration: none;
-    }
-    .foot {
-      padding: 8px 56px 28px;
-    }
   </style>
 </head>
 <body>
@@ -465,15 +388,9 @@ export function buildSlideHtml(headline, body = "", kicker = "", options = {}) {
         ${headlineHtml}
         ${count}
         ${hookBody}
-        ${kind !== "point" ? chromePills() : ""}
       </div>
       ${hero}
-      ${
-        kind === "point"
-          ? `<div class="stack">${pointCard}</div>
-      <div class="foot">${chromePills()}</div>`
-          : pointCard
-      }
+      ${kind === "point" ? `<div class="stack">${pointCard}</div>` : pointCard}
     </div>
   </div>
 </body>

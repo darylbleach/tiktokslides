@@ -13,7 +13,9 @@ describe("slidesFor", () => {
     assert.equal(slides.length, 1);
     assert.match(slides[0]!.html, /Your seating chart is lying to you/);
     assert.match(slides[0]!.html, /Tie The Knot/);
-    assert.match(slides[0]!.html, /Start free/);
+    assert.doesNotMatch(slides[0]!.html, /Start free/);
+    assert.doesNotMatch(slides[0]!.html, />tietheknot\.uk</);
+    assert.doesNotMatch(slides[0]!.html, /btn-fill|btn-outline|class="pills"|class="chip/);
     assert.match(slides[0]!.html, /Table planner/);
     assert.match(slides[0]!.html, /#F7F4EF/);
     assert.match(slides[0]!.html, /#B59E7B/);
@@ -65,5 +67,23 @@ describe("buildSlideHtml", () => {
     const html = buildSlideHtml("<script>", "a & b");
     assert.equal(html.includes("<script>"), false);
     assert.match(html, /&lt;script&gt;/);
+  });
+
+  it("does not render tappable chrome on cover, point, or hook slides", () => {
+    for (const kind of ["cover", "point", "hook"]) {
+      const html = buildSlideHtml("Headline", "Body", "", { kind, number: "01" });
+      assert.doesNotMatch(html, /Start free/);
+      assert.doesNotMatch(html, />tietheknot\.uk</);
+      assert.doesNotMatch(html, /btn-fill|btn-outline|class="pills"|class="chip/);
+      assert.doesNotMatch(html, /<a[\s>]/);
+    }
+  });
+
+  it("renders guest RSVP as list text, not pills", () => {
+    const html = buildSlideHtml("Headline", "", "", { kind: "hook", widget: "guest-list" });
+    assert.match(html, /guest-status/);
+    assert.match(html, /Maybe/);
+    assert.doesNotMatch(html, /class="chip/);
+    assert.doesNotMatch(html, /Start free/);
   });
 });
